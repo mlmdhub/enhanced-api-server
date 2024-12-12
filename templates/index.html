@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Test</title>
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+    <script>
+        const socket = io('ws://127.0.0.1:5000');
+
+        socket.on('message', function (data) {
+            console.log('Received data:', data);
+        });
+
+    </script>
+</body>
+
+</html>
