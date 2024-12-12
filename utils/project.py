@@ -1,10 +1,12 @@
 import logging
 import os
 
-def root():
-    current_dir = os.getcwd()
-    return os.path.dirname(current_dir)
 
+
+def name():
+    return 'enhanced-api-server'
+def root():
+    return os.path.dirname(os.getcwd())+'/'+name()
 def init():
     if not os.path.exists(root() + '/data'):
         os.makedirs(root() + '/data')
