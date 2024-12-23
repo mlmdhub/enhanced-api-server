@@ -9,6 +9,7 @@
   "dependencies": {
     "child_process": "^1.0.2",
     "http": "^0.0.1-security",
+    "log-to-file": "^3.0.3",
     "python-shell": "^5.0.0",
     "ws": "^8.18.0"
   },

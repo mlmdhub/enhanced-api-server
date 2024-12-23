@@ -9,3 +9,4 @@ with open(utils.project.root()+'/config/main.json', 'w') as f:
     config['project_init'] = True
 
     json.dump(config, f)
+utils.project.init()

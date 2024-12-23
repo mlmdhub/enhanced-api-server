@@ -1,7 +1,31 @@
 const http = require('http');
-const {PythonShell} = require("python-shell");
-const { spawn } = require('child_process');
+const {spawn} = require('child_process');
+// log at data/log/Server.log
+const logToFile = require('log-to-file');
+
+
+const logPath= './data/log/Server.log';
+const logger = (level,content) => {logToFile(`${level} - ${content}`,  logPath)};
+
 const server = http.createServer((req, res) => {
+    const interpreterPath = 'python';
+    const entryScript = './main.py'
+    function getRequestParams(req)  {
+        const reqParams = req.url.split('?')[1];
+        const requestParams = {};
+        if (reqParams) {
+            const params = reqParams.split('&');
+            params.forEach(param => {
+                const [key, value] = param.split('=');
+                requestParams[key] = value;
+            })
+        }
+        return requestParams;
+    }
+    const handleConnected = (requestParams) => {
+
+
+    }
     //   http://localhost:3000/stream?12=12&122=1122
     if (req.url.startsWith('/stream')) {
         res.writeHead(200, {
@@ -9,50 +33,32 @@ const server = http.createServer((req, res) => {
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive'
         });
-        handleConnected(getRequestParams(req));
-        res.end()
+        logger('INFO',`Connected to ${req.url}`);
+        const requestParams = getRequestParams(req);
+        let paramValue = JSON.stringify(requestParams)
+        logger('INFO',`Receive ${paramValue} to ${entryScript}`);
+        console.log(interpreterPath)
+        const pythonProcess = spawn(interpreterPath, [entryScript, paramValue]);
+        pythonProcess.stdout.on('data', (data) => {
+        res.write(data);
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+        res.write(data);
+    });
+
+    pythonProcess.on('close', (code) => {
+        res.end();
+    });
+        // handleConnected(requestParams);
+        // res.end()
     } else {
         res.writeHead(404);
         res.end();
     }
 });
-const getRequestParams = (req) => {
-    const reqParams = req.url.split('?')[1];
-    const requestParams = {};
-    if (reqParams) {
-        const params = reqParams.split('&');
-        params.forEach(param => {
-            const [key, value] = param.split('=');
-            requestParams[key] = value;
-        })
-    }
-    return requestParams;
-}
-const handleConnected = (requestParams) => {
-    let paramValue = JSON.stringify(requestParams)
-    console.log(paramValue)
 
-// 使用spawn启动Python脚本，并传递参数
-const pythonProcess = spawn('python', ['./main.py', paramValue]);
 
-// 监听Python脚本的标准输出，获取正常执行的结果
-pythonProcess.stdout.on('data', (data) => {
-    console.log(`Python脚本输出: ${data}`);
-});
-
-// 监听Python脚本的标准错误输出，获取报错信息
-pythonProcess.stderr.on('data', (data) => {
-    console.error(`Python脚本报错: ${data}`);
-});
-
-// 监听Python脚本执行结束事件
-pythonProcess.on('close', (code) => {
-    console.log(`Python脚本退出码: ${code}`);
-    if (code!== 0) {
-        console.error('Python脚本执行出错');
-    }
-});
-}
 server.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
 });
